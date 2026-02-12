@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy Valentine's Day Kittu ❤️</title>
+
+<style>
+
+/* ===== Animated Background ===== */
+
+body{
+margin:0;
+padding:0;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+overflow:hidden;
+color:white;
+background:linear-gradient(-45deg,#000000,#1a001f,#000000,#2b002b);
+background-size:400% 400%;
+animation:gradientMove 15s ease infinite;
+}
+
+@keyframes gradientMove{
+0%{background-position:0% 50%}
+50%{background-position:100% 50%}
+100%{background-position:0% 50%}
+}
+
+.hidden{display:none}
+
+/* ===== Glass Card ===== */
+
+.card{
+backdrop-filter:blur(20px);
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.15);
+padding:35px;
+border-radius:25px;
+width:90%;
+max-width:420px;
+text-align:center;
+box-shadow:0 0 80px rgba(255,0,120,0.4);
+animation:fadeIn 1s ease;
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(20px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+h1{font-size:26px;margin-bottom:15px}
+p{font-size:16px;line-height:1.9;margin-top:15px}
+
+input{
+padding:10px;
+width:80%;
+border-radius:10px;
+border:none;
+margin-top:10px;
+text-align:center;
+outline:none;
+}
+
+button{
+margin-top:15px;
+padding:10px 25px;
+border-radius:25px;
+border:none;
+background:#ff2e63;
+color:white;
+font-weight:600;
+cursor:pointer;
+}
+
+/* ===== Photo ===== */
+
+.photo{
+width:150px;
+height:150px;
+border-radius:50%;
+object-fit:cover;
+margin-bottom:15px;
+opacity:0;
+transform:scale(0.6);
+transition:all 1s ease;
+box-shadow:0 0 30px rgba(255,0,120,0.8);
+}
+
+.photo.show{
+opacity:1;
+transform:scale(1);
+}
+
+/* ===== Mute ===== */
+
+.muteBtn{
+position:fixed;
+top:20px;
+right:20px;
+background:#ff2e63;
+border:none;
+padding:8px 12px;
+border-radius:20px;
+color:white;
+cursor:pointer;
+}
+
+/* ===== Hearts ===== */
+
+.heart{
+position:absolute;
+animation:float 8s infinite ease-in;
+}
+
+@keyframes float{
+0%{transform:translateY(0);opacity:0}
+50%{opacity:1}
+100%{transform:translateY(-1000px);opacity:0}
+}
+
+/* ===== Firework Particles ===== */
+
+.particle{
+position:absolute;
+width:4px;
+height:4px;
+border-radius:50%;
+animation:explode 1.2s ease-out forwards;
+}
+
+@keyframes explode{
+0%{transform:translate(0,0);opacity:1}
+100%{transform:translate(var(--x),var(--y));opacity:0}
+}
+
+/* ===== Counter ===== */
+
+.counter{
+margin-top:10px;
+font-size:14px;
+opacity:0.8;
+}
+
+/* ===== Popup ===== */
+
+.popup{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+background:rgba(0,0,0,0.95);
+padding:25px;
+border-radius:20px;
+text-align:center;
+box-shadow:0 0 80px rgba(255,0,120,0.7);
+z-index:999;
+}
+
+.flash{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:white;
+opacity:0;
+pointer-events:none;
+}
+
+</style>
+</head>
+<body>
+
+<div class="flash" id="flash"></div>
+
+<button class="muteBtn hidden" id="muteBtn" onclick="toggleMusic()">🔊</button>
+
+<div class="card" id="loginBox">
+<h2>Enter Secret Password 🔒</h2>
+<input type="password" id="passwordInput" placeholder="Password">
+<br>
+<button onclick="unlock()">Unlock ❤️</button>
+</div>
+
+<div class="card hidden" id="countBox">
+<h2 id="countText">Unlocking...</h2>
+</div>
+
+<div class="card hidden" id="mainBox">
+<img src="kittu.jpg" class="photo" id="photo">
+<h1>Happy Valentine's Day Kittu ❤️</h1>
+<p id="typedText"></p>
+<div class="counter">Loving you for <span id="loveCount">0</span> seconds ❤️</div>
+</div>
+
+<div class="popup hidden" id="popup">
+<h2>Will you stay with me forever? ❤️</h2>
+<button onclick="yesExplosion()">Yes ❤️</button>
+</div>
+
+<audio id="bgMusic" loop>
+<source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<audio id="clickSound">
+<source src="click.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+
+const correctPassword="Ukawaii";
+
+const message=`Kittu 🐱,
+
+তোমাকে আমি শুধু ভালোবাসি না,
+তোমাকে আমি নিজের মানুষ মনে করি ❤️
+
+ঝগড়া হোক —
+দিনের শেষে তোমাকেই চাই।
+
+আমি হয়তো পারফেক্ট না,
+কিন্তু তোমার জন্য সিরিয়াস।
+
+I love you, Kittu.
+সবসময় 💖`;
+
+function unlock(){
+if(passwordInput.value===correctPassword){
+clickSound.play();
+loginBox.classList.add("hidden");
+startCountdown();
+}else{alert("Wrong password 😅")}
+}
+
+function startCountdown(){
+countBox.classList.remove("hidden");
+let c=3;
+let i=setInterval(()=>{
+countText.innerText="Unlocking in "+c+"...";
+c--;
+if(c<0){clearInterval(i);countBox.classList.add("hidden");showMain();}
+},1000);
+}
+
+function showMain(){
+mainBox.classList.remove("hidden");
+muteBtn.classList.remove("hidden");
+fadeMusic();
+typeEffect();
+setTimeout(()=>photo.classList.add("show"),800);
+startLoveCounter();
+generateHearts();
+setTimeout(()=>popup.classList.remove("hidden"),15000);
+}
+
+function fadeMusic(){
+bgMusic.volume=0;
+bgMusic.play();
+let v=0;
+let f=setInterval(()=>{
+if(v<1){v+=0.05;bgMusic.volume=v}else{clearInterval(f)}
+},200);
+}
+
+function toggleMusic(){
+if(bgMusic.paused){bgMusic.play();muteBtn.innerText="🔊"}
+else{bgMusic.pause();muteBtn.innerText="🔇"}
+}
+
+let i=0;
+function typeEffect(){
+if(i<message.length){
+typedText.innerHTML+=message.charAt(i);
+i++;setTimeout(typeEffect,30);
+}
+}
+
+function generateHearts(){
+for(let i=0;i<30;i++){
+let h=document.createElement("div");
+h.className="heart";
+h.innerHTML="❤️";
+h.style.left=Math.random()*100+"vw";
+h.style.fontSize=Math.random()*25+12+"px";
+h.style.animationDuration=(Math.random()*6+4)+"s";
+document.body.appendChild(h);
+}
+}
+
+/* Continuous background fireworks */
+setInterval(()=>{
+for(let i=0;i<15;i++){
+createParticle();
+}
+},1500);
+
+function createParticle(){
+let p=document.createElement("div");
+p.className="particle";
+p.style.left=Math.random()*100+"vw";
+p.style.top=Math.random()*60+"vh";
+p.style.background=`hsl(${Math.random()*360},100%,60%)`;
+p.style.setProperty("--x",(Math.random()*300-150)+"px");
+p.style.setProperty("--y",(Math.random()*300-150)+"px");
+document.body.appendChild(p);
+setTimeout(()=>p.remove(),1200);
+}
+
+/* Love counter */
+function startLoveCounter(){
+let s=0;
+setInterval(()=>{s++;loveCount.innerText=s},1000);
+}
+
+/* Massive YES Explosion */
+function yesExplosion(){
+
+popup.classList.add("hidden");
+
+/* Screen flash */
+flash.style.opacity=1;
+setTimeout(()=>flash.style.opacity=0,200);
+
+/* Massive burst */
+for(let i=0;i<200;i++){
+createParticle();
+}
+
+/* Big text message */
+let msg=document.createElement("div");
+msg.innerHTML="Forever Starts Now ❤️";
+msg.style.position="fixed";
+msg.style.top="50%";
+msg.style.left="50%";
+msg.style.transform="translate(-50%,-50%)";
+msg.style.fontSize="32px";
+msg.style.fontWeight="bold";
+msg.style.color="#ff2e63";
+msg.style.textShadow="0 0 20px #ff2e63";
+msg.style.zIndex="999";
+document.body.appendChild(msg);
+
+}
+
+</script>
+</body>
+</html>
